@@ -13,9 +13,9 @@
 #include <xkbcommon/xkbcommon.h>
 #include <string.h>
 #include "randomtext.h"
-#include <QLineEdit>
 #include <QKeyEvent>
 #include <QTextEdit>
+#include <QTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,6 +31,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+ signals:
+    void updateT();
+private slots:
+    void updateSpeed();
+    void updateTime();
+    void updateAccuracy();
+
 private:
     Ui::MainWindow *ui;
 
@@ -40,10 +47,12 @@ private:
     QComboBox *languages;
     QLabel *accuracy;
     QLabel *speed;
+    QLabel *time;
+    QTimer *timer;
+
+    QTime start;
 
     QTextEdit *text;
-
-    QLineEdit* checkline;
 
     QGraphicsView *keyboardView;
     QGraphicsScene *keyboardScene;
@@ -52,6 +61,8 @@ private:
     QList<QChar> listChar;
 
     int cursor;
+    int symbols=0;
+    int allsymbols=0;
 
     RandomText *textGetter;
 

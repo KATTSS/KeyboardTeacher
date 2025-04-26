@@ -1,7 +1,5 @@
 #include "key.h"
 
-//Key::Key() {}
-
 Key::Key(QGraphicsScene *scene, QChar letter, QRectF rect, int index, QGraphicsItem *parent) : QGraphicsItem(parent)
 {
     this->scene=scene;
@@ -36,9 +34,7 @@ void Key::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidg
     }
 
     if(isPressed) painter->setBrush(QColor(205, 87, 51));
-    //painter->setBrush(isPressed ? Qt::yellow : Qt::gray);
     painter->drawRect(boundingRect());
-    //qDebug() << boundingRect();
     painter->setPen(Qt::black);
     painter->drawText(boundingRect(), Qt::AlignCenter, QString(letter));
 }

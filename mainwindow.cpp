@@ -24,21 +24,19 @@ MainWindow::MainWindow(QWidget *parent)
     languages->setFocusPolicy(Qt::NoFocus);
 
     accuracy = new QLabel("Accuracy: 100%", this);
-    speed = new QLabel ("Speed in words/minute: ", this);
+    speed = new QLabel ("Speed in sym/sec: ", this);
+    time = new QLabel ("Time: ", this);
     statusBar->addWidget(languages);
     statusBar->addWidget((accuracy));
     statusBar->addWidget(speed);
+    statusBar->addWidget(time);
     mainLayout->addLayout(statusBar);
 
     text = new QTextEdit(this);
-    //text->setWordWrap(true);
     text->setReadOnly(true);
     text->setStyleSheet("font-size: 25px; color: gray");
     text->setText("Choose a language");
     mainLayout->addWidget(text);
-
-    // checkline = new QLineEdit(this);
-    // mainLayout->addWidget(checkline);
 
     keyboardScene = new QGraphicsScene(this);
     keyboardView = new QGraphicsView(keyboardScene, this);
@@ -51,9 +49,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(languages, &QComboBox::currentTextChanged,this, &MainWindow::update);
 
     textGetter = new RandomText("/home/katya/work/453501/ОАиП/LR5/Words.txt");
-    // QTimer::singleShot(2000, [this](){ createKeyboard("us"); });
-    createKeyboard("us");
+       createKeyboard("us");
     cursor=0;
+
+    start = QTime::currentTime();
+
+    timer = new QTimer();
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateSpeed()));
+    connect(timer, SIGNAL(updateT()), this, SLOT(updateTime()));
+    timer->start(10000);
 }
 
 MainWindow::~MainWindow()
@@ -62,6 +66,25 @@ MainWindow::~MainWindow()
     xkb_keymap_unref(keymap);
     xkb_context_unref(ctx);
     delete ui;
+}
+
+void MainWindow::updateSpeed()
+{
+    speed->setText("Speed in sym/sec: "+ QString::number(symbols/10.0));
+    updateTime();
+    updateAccuracy();
+    symbols=0;
+}
+
+void MainWindow::updateTime()
+{
+    time->setText("Time(sec): "+ QString::number(start.secsTo(QTime::currentTime())));
+
+}
+
+void MainWindow::updateAccuracy()
+{
+    accuracy->setText("Accuracy: " + QString::number(100*(cursor)/allsymbols)+"%");
 }
 
 void MainWindow::createKeyboard(QString language)
@@ -115,15 +138,21 @@ void MainWindow::updateText()
 
 void MainWindow::update()
 {
+
     cursor=0;
+    allsymbols=0;
     getAppropriateText();
     updateText();
+    emit updateT();
+    start=QTime::currentTime();
+    accuracy->setText("Accuracy: 100%");
 }
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     grabKeyboard();
-
-   // QString pressedKey = event->text();
+    ++symbols;
+    ++allsymbols;
+\
     int code = event->nativeScanCode();
     QChar actual;
     char buffer[32];
@@ -157,14 +186,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         textCursor = text->textCursor();
         textCursor.setPosition(cursor);
         textCursor.setPosition(cursor + 1, QTextCursor::KeepAnchor);
-        //format.setForeground(Qt::red);
-      //  QTimer::singleShot(1000, this, [](QTextCharFormat format, QTextCursor textCursor) {format.setForeground(Qt::red); textCursor.mergeCharFormat(format); });
-       // textCursor.mergeCharFormat(format);
         text->setTextCursor(textCursor);
         qDebug() << "Incorrect input, waiting for next attempt";
     }
-
-    //checkline->setText(pressedKey);
 
     if (cursor >= text->document()->characterCount() - 1) {
         qDebug() << "Text completed!";

@@ -6,13 +6,11 @@ RandomText::RandomText(const QString &filePath){
 
 QString RandomText::getRandomText(const int &index)
 {
-    //qDebug() << "in getting text. before";
     QFile loadedFile(file);
     QString randomTextString;
     QStringList list;
     if (loadedFile.open(QIODevice::ReadOnly| QIODevice::Text)) {
         QTextStream in(&loadedFile);
-        //qDebug() << "in getRandomText in randomText";
         for (int i = 0; i < 20*index; ++i) {
             if (in.readLine().isNull()) {
                 return "" ;
@@ -34,6 +32,5 @@ QString RandomText::getRandomText(const int &index)
         randomTextString.append(list[array[i] % list.size()]);
         randomTextString.append(" ");
     }
-    //qDebug() << randomTextString;
     return randomTextString.trimmed();
 }
